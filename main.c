@@ -2,84 +2,126 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-void gol_init(/* Recibo un mundo */);
-void gol_print(/* Recibo un mundo */);
-void gol_step(/* Recibo dos mundos */);
-int gol_count_neighbors(/* Recibo un mundo y unas coordenadas */);
-bool gol_get_cell(/* Recibo un mundo y unas coordenadas */);
-void gol_copy(/* Recibo dos mundos */);
+void gol_init();
+void gol_print();
+void gol_step();
+int gol_count_neighbors();
+bool gol_get_cell();
+void gol_copy();
+
 
 int main()
 {
+	bool world1[5][5];
+	bool world2[5][5];
 	int i = 0;
-	// TODO: Declara dos mundos
+	
+	gol_init(world1);
 
-	// TODO: inicializa el mundo
 	do {
 		printf("\033cIteration %d\n", i++);
-		// TODO: Imprime el mundo
-		// TODO: Itera
+		gol_print(world1);
+		gol_step(world1, world2);
 	} while (getchar() != 'q');
 
 	return EXIT_SUCCESS;
 }
 
-void gol_init(/* Recibo un mundo */)
+void gol_init(bool *world)
 {
-	// TODO: Poner el mundo a false
-
-	/* TODO: Inicializar con el patrón del glider:
-	 *           . # .
-	 *           . . #
-	 *           # # #
-	 */
+	for(int i = 0; i < 5; i++)
+	{
+		for(int j = 0 ; j < 5; j++)
+		{
+			if (j > 0 && j < 4 && i == 2){
+				*((world + j + i*5)) = true;
+			} else {
+				*(world + j + i*5) = false;
+			}
+		}
+	}	
+}
+void gol_print(bool *world)
+{
+	for(int i = 0; i < 5; i++)
+	{
+		for(int j = 0 ; j < 5; j++)
+		{
+			if (*(world + j + i*5) == true) {
+				printf("@");
+			} else {
+				printf("-");
+			}
+		}
+		printf("\n");
+	}
 }
 
-void gol_print(/* Recibo un mundo */)
+void gol_step(bool *world1, bool *world2)
 {
-	// TODO: Imprimir el mundo por consola. Sugerencia:
-	/*
-	 *     . # . . . . . . . .
-	 *     . . # . . . . . . .
-	 *     # # # . . . . . . .
-	 *     . . . . . . . . . .
-	 *     . . . . . . . . . .
-	 *     . . . . . . . . . .
-	 *     . . . . . . . . . .
-	 *     . . . . . . . . . .
-	 *     . . . . . . . . . .
-	 *     . . . . . . . . . .
-	 */
+	for(int i = 0; i < 5; i++)
+	{
+		for(int j = 0 ; j < 5; j++)
+		{
+			*(world2 +j +i*5) = gol_get_cell(world1, i, j);
+		}
+	}
+	gol_copy(world1, world2);
 }
 
-void gol_step(/* Recibo dos mundos */)
+int gol_count_neighbors(bool *world, int i, int j)
 {
-	/*
-	 * TODO:
-	 * - Recorrer el mundo célula por célula comprobando si nace, sobrevive
-	 *   o muere.
-	 *
-	 * - No se puede cambiar el estado del mundo a la vez que se recorre:
-	 *   Usar un mundo auxiliar para guardar el siguiente estado.
-	 *
-	 * - Copiar el mundo auxiliar sobre el mundo principal
-	 */
+
+    bool *min = world;
+    bool *max = world + (5*5)-1;
+	int neighbors = 0;
+    if((world + j + (i*5)) >= min && (world + j + (i*5)) <= max) {
+		if (world + (j - 1) + ((i*5)-1) >= min && world + (j - 1) + ((i*5)-1) <= max && *(world + (j - 1)+ ((i*5)-1)) == true){
+			neighbors ++;
+		}
+		if (world + j + ((i*5)-1) >= min && world + j + ((i*5)-1) <= max && *(world + j + ((i*5)-1)) == true){
+			neighbors ++;
+		}
+		if (world + (j + 1) + ((i*5)-1) >= min && world + (j + 1) + ((i*5)-1) <= max && *(world + (j + 1) + ((i*5)-1)) == true){
+			neighbors ++;
+		}
+		if (world + (j - 1) + (i*5) >= min && world + (j - 1) + (i*5) <= max && *(world + (j - 1) + (i*5)) == true){
+			neighbors ++;
+		}
+		if (world + (j + 1) + (i*5) >= min && world + (j + 1) + (i*5) <= max && *(world + (j + 1) + (i*5)) == true){
+			neighbors ++;
+		}
+		if (world + (j - 1) + ((i*5)+1) >= min && world + (j - 1) + ((i*5)+1) <= max && *(world + (j - 1) + ((i*5)+1)) == true){
+			neighbors ++;
+		}
+		if (world + j + ((i*5)+1) >= min && world + j + ((i*5)+1) <= max && *(world + j + ((i*5)+1)) == true){
+			neighbors ++;
+		}
+		if (world + (j + 1) + ((i*5)+1) >= min && world + (j + 1) + ((i*5)+1) <= max && *(world + (j + 1) + ((i*5)+1)) == true){
+			neighbors ++;
+		}
+	}
+	return neighbors;
+	
 }
 
-int gol_count_neighbors(/* Recibo un mundo y unas coordenadas */)
+
+bool gol_get_cell(bool *world, int i, int j )
 {
-	// Devuelve el número de vecinos
+	bool stats = false;
+	if(gol_count_neighbors(world, i, j) == 3 || gol_count_neighbors(world, i, j) == 2){
+	stats= true;
+	} 
+	return stats;
 }
 
-bool gol_get_cell(/* Recibo un mundo y unas coordenadas */)
+void gol_copy(bool *world1, bool *world2)
 {
-	/*
-	 * TODO: Devuelve el estado de la célula de posición indicada
-	 * (¡cuidado con los límites del array!)
-	 */
-}
-
-void gol_copy(/* Recibo dos mundos */)
-{
-	// TODO: copia el mundo segundo mundo sobre el primero
+	for(int i = 0; i < 5; i++)
+	{
+		for(int j = 0 ; j < 5; j++)
+		{
+			*(world1 +j +i*5) = *(world2 +j +i*5);
+		}
+	} 
 }
