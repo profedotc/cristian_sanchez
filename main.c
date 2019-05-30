@@ -68,17 +68,15 @@ void gol_step(bool world1[TAM_X][TAM_Y], bool world2[TAM_X][TAM_Y])
 		
 		for(int j = 0 ; j < TAM_Y; j++)
 		{
-			int neighbors = 0;
-			neighbors = gol_count_neighbors(world1, i, j);
-			
-			if( neighbors == 2 || neighbors == 3){
-				world2[i][j] = true;
-			} else {
-				world2[i][j] = false;
-			}
+			int neighbors = gol_count_neighbors(world1, i, j);
 			printf("%d vecinas\n\n", neighbors);
 			printf("X= %d	Y= %d\n", i, j);
 			
+			if (world1[i][j]) {
+				world2[i][j] = (neighbors == 3) || (neighbors == 2);
+			} else {
+				world2[i][j] = (neighbors == 3);
+}
 		}
 	}
 
@@ -107,8 +105,11 @@ int gol_count_neighbors(bool world[TAM_X][TAM_Y], int x, int y)
 
 bool gol_get_cell(bool world[TAM_X][TAM_Y], int x, int y)
 {
-	if (x < 0 || x >= TAM_X || y < 0 || y >= TAM_Y)
-		return false;
+	bool *min = &world[0][0];
+	bool *max = &world[TAM_X - 1][TAM_Y - 1];
+	
+	if (&world[x][y]  < min || &world[x][y]  > max)
+		return false;	
 	return world[x][y];
 }
 
