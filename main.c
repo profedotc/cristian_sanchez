@@ -2,18 +2,21 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-void gol_init();
-void gol_print();
-void gol_step();
-int gol_count_neighbors();
-bool gol_get_cell();
-void gol_copy();
+#define TAM_X 5
+#define TAM_Y 5
+
+void gol_init(bool world[TAM_X][TAM_Y]);
+void gol_print(bool world[TAM_X][TAM_Y]);
+void gol_step(bool world1[TAM_X][TAM_Y], bool world2[TAM_X][TAM_Y]);
+int gol_count_neighbors(bool world[TAM_X][TAM_Y], int x, int y);
+bool gol_get_cell(bool world[TAM_X][TAM_Y], int x, int y );
+void gol_copy(bool world1[TAM_X][TAM_Y], bool world2[TAM_X][TAM_Y]);
 
 
 int main()
 {
-	bool world1[5][5];
-	bool world2[5][5];
+	bool world1[TAM_X][TAM_Y];
+	bool world2[TAM_X][TAM_Y];
 	int i = 0;
 	
 	gol_init(world1);
@@ -27,27 +30,27 @@ int main()
 	return EXIT_SUCCESS;
 }
 
-void gol_init(bool *world)
+void gol_init(bool world[TAM_X][TAM_Y])
 {
 	for(int i = 0; i < 5; i++)
 	{
 		for(int j = 0 ; j < 5; j++)
 		{
 			if (j > 0 && j < 4 && i == 2){
-				*((world + j + i*5)) = true;
+				world[i][j] = true;
 			} else {
-				*(world + j + i*5) = false;
+				world[i][j]  = false;
 			}
 		}
 	}	
 }
-void gol_print(bool *world)
+void gol_print(bool world[TAM_X][TAM_Y])
 {
 	for(int i = 0; i < 5; i++)
 	{
 		for(int j = 0 ; j < 5; j++)
 		{
-			if (*(world + j + i*5) == true) {
+			if (world[i][j] == true) {
 				printf("@");
 			} else {
 				printf("-");
@@ -57,71 +60,65 @@ void gol_print(bool *world)
 	}
 }
 
-void gol_step(bool *world1, bool *world2)
+void gol_step(bool world1[TAM_X][TAM_Y], bool world2[TAM_X][TAM_Y])
 {
-	for(int i = 0; i < 5; i++)
+	
+	for(int i = 0; i < TAM_X; i++)
 	{
-		for(int j = 0 ; j < 5; j++)
+		
+		for(int j = 0 ; j < TAM_Y; j++)
 		{
-			*(world2 +j +i*5) = gol_get_cell(world1, i, j);
+			int neighbors = 0;
+			neighbors = gol_count_neighbors(world1, i, j);
+			
+			if( neighbors == 2 || neighbors == 3){
+				world2[i][j] = true;
+			} else {
+				world2[i][j] = false;
+			}
+			printf("%d vecinas\n\n", neighbors);
+			printf("X= %d	Y= %d\n", i, j);
+			
 		}
 	}
+
 	gol_copy(world1, world2);
 }
 
-int gol_count_neighbors(bool *world, int i, int j)
+int gol_count_neighbors(bool world[TAM_X][TAM_Y], int x, int y)
 {
+    int neighbors = 0;
+    
+	neighbors += gol_get_cell(world, x - 1, y - 1);
+	neighbors += gol_get_cell(world, x - 0, y - 1);
+	neighbors += gol_get_cell(world, x + 1, y - 1);
 
-    bool *min = world;
-    bool *max = world + (5*5)-1;
-	int neighbors = 0;
-    if((world + j + (i*5)) >= min && (world + j + (i*5)) <= max) {
-		if (world + (j - 1) + ((i*5)-1) >= min && world + (j - 1) + ((i*5)-1) <= max && *(world + (j - 1)+ ((i*5)-1)) == true){
-			neighbors ++;
-		}
-		if (world + j + ((i*5)-1) >= min && world + j + ((i*5)-1) <= max && *(world + j + ((i*5)-1)) == true){
-			neighbors ++;
-		}
-		if (world + (j + 1) + ((i*5)-1) >= min && world + (j + 1) + ((i*5)-1) <= max && *(world + (j + 1) + ((i*5)-1)) == true){
-			neighbors ++;
-		}
-		if (world + (j - 1) + (i*5) >= min && world + (j - 1) + (i*5) <= max && *(world + (j - 1) + (i*5)) == true){
-			neighbors ++;
-		}
-		if (world + (j + 1) + (i*5) >= min && world + (j + 1) + (i*5) <= max && *(world + (j + 1) + (i*5)) == true){
-			neighbors ++;
-		}
-		if (world + (j - 1) + ((i*5)+1) >= min && world + (j - 1) + ((i*5)+1) <= max && *(world + (j - 1) + ((i*5)+1)) == true){
-			neighbors ++;
-		}
-		if (world + j + ((i*5)+1) >= min && world + j + ((i*5)+1) <= max && *(world + j + ((i*5)+1)) == true){
-			neighbors ++;
-		}
-		if (world + (j + 1) + ((i*5)+1) >= min && world + (j + 1) + ((i*5)+1) <= max && *(world + (j + 1) + ((i*5)+1)) == true){
-			neighbors ++;
-		}
-	}
-	return neighbors;
+	neighbors += gol_get_cell(world, x - 1, y - 0);
+	neighbors += gol_get_cell(world, x + 1, y - 0);
 	
+	neighbors += gol_get_cell(world, x - 1, y + 1);
+	neighbors += gol_get_cell(world, x - 0, y + 1);
+	neighbors += gol_get_cell(world, x + 1, y + 1);
+	
+	return neighbors;
 }
 
 
-bool gol_get_cell(bool *world, int i, int j )
+
+bool gol_get_cell(bool world[TAM_X][TAM_Y], int x, int y)
 {
-	bool stats = false;
-	if(gol_count_neighbors(world, i, j) == 3 || gol_count_neighbors(world, i, j) == 2){
-	stats= true;
-	} 
-	return stats;
+	if (x < 0 || x >= TAM_X || y < 0 || y >= TAM_Y)
+		return false;
+	return world[x][y];
 }
 
-void gol_copy(bool *world1, bool *world2)
+void gol_copy(bool world1[TAM_X][TAM_Y], bool world2[TAM_X][TAM_Y])
 {
 	for(int i = 0; i < 5; i++)
 	{
 		for(int j = 0 ; j < 5; j++)
 		{
-			*(world1 +j +i*5) = *(world2 +j +i*5);
+			world1[i][j] = world2[i][j];
 		}
 	} 
 }
