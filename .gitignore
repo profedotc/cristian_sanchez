@@ -20,5 +20,5 @@
 
 #Proyect Files
 main
-main.o
+*.o
 run
