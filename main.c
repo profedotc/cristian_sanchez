@@ -4,23 +4,14 @@
 
 int main()
 {
-	bool world[2][TAM_X][TAM_Y];
 	int i = 0;
-	
-	
-	gol_init(world[0]);
-
-	do {
-		printf("\033cIteration %d\n", i);
-		
-		if(i%2 == 0){
-			gol_print(world[0]);
-			gol_step(world[0], world[1]);
-		} else {
-			gol_print(world[1]);
-			gol_step(world[1], world[0]);
-		}
-		i++;
+	struct worldClass wordlsObject;
+	gol_init(&wordlsObject);
+	do
+	{
+		printf("\033cIteration %d\n", i++);
+		gol_print(&wordlsObject);
+		gol_step(&wordlsObject);
 	} while (getchar() != 'q');
 
 	return EXIT_SUCCESS;

@@ -1,32 +1,34 @@
-#include <stdio.h>
 #include "gol.h"
 
-
-void gol_init(bool world[TAM_X][TAM_Y])
+void gol_init(struct worldClass *wordlsObject)
 {
-	for(int i = 0; i < TAM_X; i++)
+	wordlsObject->wordlUsed = false;
+	for (int i = 0; i < TAM_X; i++)
 	{
-		for(int j = 0 ; j < TAM_Y; j++)
+		for (int j = 0; j < TAM_Y; j++)
 		{
-			world[i][j]  = false;
+			wordlsObject->worlds[wordlsObject->wordlUsed][i][j] = false;
 		}
 	}
-	world[0][1] = true;
-	world[1][2] = true;
-	world[2][0] = true;
-	world[2][1] = true;
-	world[2][2] = true;
+	wordlsObject->worlds[wordlsObject->wordlUsed][0][1] = true;
+	wordlsObject->worlds[wordlsObject->wordlUsed][1][2] = true;
+	wordlsObject->worlds[wordlsObject->wordlUsed][2][0] = true;
+	wordlsObject->worlds[wordlsObject->wordlUsed][2][1] = true;
+	wordlsObject->worlds[wordlsObject->wordlUsed][2][2] = true;
 }
 
-void gol_print(bool world[TAM_X][TAM_Y])
+void gol_print(const struct worldClass *wordlsObject)
 {
-	for(int i = 0; i < TAM_X; i++)
+	for (int i = 0; i < TAM_X; i++)
 	{
-		for(int j = 0 ; j < TAM_Y; j++)
+		for (int j = 0; j < TAM_Y; j++)
 		{
-			if (world[i][j] == true) {
+			if (wordlsObject->worlds[wordlsObject->wordlUsed][i][j] == true)
+			{
 				printf(" X ");
-			} else {
+			}
+			else
+			{
 				printf(" * ");
 			}
 		}
@@ -34,41 +36,44 @@ void gol_print(bool world[TAM_X][TAM_Y])
 	}
 }
 
-void gol_step(bool world1[TAM_X][TAM_Y], bool world2[TAM_X][TAM_Y])
+void gol_step(struct worldClass *wordlsObject)
 {
-	
-	for(int i = 0; i < TAM_X; i++)
+
+	for (int i = 0; i < TAM_X; i++)
 	{
-		
-		for(int j = 0 ; j < TAM_Y; j++)
+
+		for (int j = 0; j < TAM_Y; j++)
 		{
-			int neighbors = gol_count_neighbors(world1, i, j);
-			
-			if (world1[i][j]) {
-				world2[i][j] = (neighbors == 3) || (neighbors == 2);
-			} else {
-				world2[i][j] = (neighbors == 3);
+			int neighbors = gol_count_neighbors(wordlsObject->worlds[wordlsObject->wordlUsed], i, j);
+
+			if (wordlsObject->worlds[wordlsObject->wordlUsed][i][j])
+			{
+				wordlsObject->worlds[!wordlsObject->wordlUsed][i][j] = (neighbors == 3) || (neighbors == 2);
+			}
+			else
+			{
+				wordlsObject->worlds[!wordlsObject->wordlUsed][i][j] = (neighbors == 3);
 			}
 		}
 	}
-
+	wordlsObject->wordlUsed = !wordlsObject->wordlUsed;
 }
 
 int gol_count_neighbors(bool world[TAM_X][TAM_Y], int x, int y)
 {
-    int neighbors = 0;
-    
+	int neighbors = 0;
+
 	neighbors += gol_get_cell(world, x - 1, y - 1);
 	neighbors += gol_get_cell(world, x - 0, y - 1);
 	neighbors += gol_get_cell(world, x + 1, y - 1);
 
 	neighbors += gol_get_cell(world, x - 1, y - 0);
 	neighbors += gol_get_cell(world, x + 1, y - 0);
-	
+
 	neighbors += gol_get_cell(world, x - 1, y + 1);
 	neighbors += gol_get_cell(world, x - 0, y + 1);
 	neighbors += gol_get_cell(world, x + 1, y + 1);
-	
+
 	return neighbors;
 }
 
@@ -76,10 +81,8 @@ bool gol_get_cell(bool world[TAM_X][TAM_Y], int x, int y)
 {
 	bool *min = &world[0][0];
 	bool *max = &world[TAM_X - 1][TAM_Y - 1];
-	
-	if (&world[x][y]  < min || &world[x][y]  > max)
-		return false;	
+
+	if (&world[x][y] < min || &world[x][y] > max)
+		return false;
 	return world[x][y];
 }
-
-
