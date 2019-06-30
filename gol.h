@@ -14,4 +14,3 @@ struct worldClass
 void gol_init(struct worldClass *wordlsObject);
 void gol_print(const struct worldClass *wordlsObject);
 void gol_step(struct worldClass *wordlsObject);
-

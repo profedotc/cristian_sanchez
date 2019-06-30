@@ -1,7 +1,7 @@
 #include "gol.h"
 
-static int count_neighbors(bool world[TAM_X][TAM_Y], bool *position);
-static bool get_cell(bool world[TAM_X][TAM_Y], bool *position);
+static int count_neighbors(bool world[TAM_X][TAM_Y], int x, int y);
+static bool get_cell(bool world[TAM_X][TAM_Y], int x, int y);
 
 void gol_init(struct worldClass *wordlsObject)
 {
@@ -47,7 +47,7 @@ void gol_step(struct worldClass *wordlsObject)
 
 		for (int j = 0; j < TAM_Y; j++)
 		{
-			int neighbors = count_neighbors(wordlsObject->worlds[wordlsObject->wordlUsed], &wordlsObject->worlds[wordlsObject->wordlUsed][i][j]);
+			int neighbors = count_neighbors(wordlsObject->worlds[wordlsObject->wordlUsed], i, j);
 
 			if (wordlsObject->worlds[wordlsObject->wordlUsed][i][j])
 			{
@@ -62,31 +62,30 @@ void gol_step(struct worldClass *wordlsObject)
 	wordlsObject->wordlUsed = !wordlsObject->wordlUsed;
 }
 
-int count_neighbors(bool world[TAM_X][TAM_Y], bool *position)
+int count_neighbors(bool world[TAM_X][TAM_Y], int x, int y)
 {
 	int neighbors = 0;
 
-	neighbors += get_cell(world, (position-(TAM_Y-1)));	
-	neighbors += get_cell(world, (position-TAM_Y));	
-	neighbors += get_cell(world, (position-(TAM_Y+1)));
+	neighbors += get_cell(world, x - 1, y - 1);
+	neighbors += get_cell(world, x - 0, y - 1);
+	neighbors += get_cell(world, x + 1, y - 1);
 
-	neighbors += get_cell(world, (position+1));	
-	neighbors += get_cell(world, (position-1));
-		
-	neighbors += get_cell(world, (position+(TAM_Y-1)));	
-	neighbors += get_cell(world, (position+TAM_Y));	
-	neighbors += get_cell(world, (position+(TAM_Y+1)));
+	neighbors += get_cell(world, x - 1, y - 0);
+	neighbors += get_cell(world, x + 1, y - 0);
+
+	neighbors += get_cell(world, x - 1, y + 1);
+	neighbors += get_cell(world, x - 0, y + 1);
+	neighbors += get_cell(world, x + 1, y + 1);
 
 	return neighbors;
 }
 
-bool get_cell(bool world[TAM_X][TAM_Y], bool *position)
+bool get_cell(bool world[TAM_X][TAM_Y], int x, int y)
 {
-
 	bool *min = &world[0][0];
 	bool *max = &world[TAM_X - 1][TAM_Y - 1];
 
-	if (position < min || position > max)
+	if (&world[x][y] < min || &world[x][y] > max)
 		return false;
-	return *position;
+	return world[x][y];
 }
