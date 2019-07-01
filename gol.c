@@ -1,5 +1,8 @@
 #include "gol.h"
 
+static int count_neighbors(bool world[TAM_X][TAM_Y], int x, int y);
+static bool get_cell(bool world[TAM_X][TAM_Y], int x, int y);
+
 void gol_init(struct worldClass *wordlsObject)
 {
 	wordlsObject->wordlUsed = false;
@@ -44,7 +47,7 @@ void gol_step(struct worldClass *wordlsObject)
 
 		for (int j = 0; j < TAM_Y; j++)
 		{
-			int neighbors = gol_count_neighbors(wordlsObject->worlds[wordlsObject->wordlUsed], i, j);
+			int neighbors = count_neighbors(wordlsObject->worlds[wordlsObject->wordlUsed], i, j);
 
 			if (wordlsObject->worlds[wordlsObject->wordlUsed][i][j])
 			{
@@ -59,25 +62,25 @@ void gol_step(struct worldClass *wordlsObject)
 	wordlsObject->wordlUsed = !wordlsObject->wordlUsed;
 }
 
-int gol_count_neighbors(bool world[TAM_X][TAM_Y], int x, int y)
+int count_neighbors(bool world[TAM_X][TAM_Y], int x, int y)
 {
 	int neighbors = 0;
 
-	neighbors += gol_get_cell(world, x - 1, y - 1);
-	neighbors += gol_get_cell(world, x - 0, y - 1);
-	neighbors += gol_get_cell(world, x + 1, y - 1);
+	neighbors += get_cell(world, x - 1, y - 1);
+	neighbors += get_cell(world, x - 0, y - 1);
+	neighbors += get_cell(world, x + 1, y - 1);
 
-	neighbors += gol_get_cell(world, x - 1, y - 0);
-	neighbors += gol_get_cell(world, x + 1, y - 0);
+	neighbors += get_cell(world, x - 1, y - 0);
+	neighbors += get_cell(world, x + 1, y - 0);
 
-	neighbors += gol_get_cell(world, x - 1, y + 1);
-	neighbors += gol_get_cell(world, x - 0, y + 1);
-	neighbors += gol_get_cell(world, x + 1, y + 1);
+	neighbors += get_cell(world, x - 1, y + 1);
+	neighbors += get_cell(world, x - 0, y + 1);
+	neighbors += get_cell(world, x + 1, y + 1);
 
 	return neighbors;
 }
 
-bool gol_get_cell(bool world[TAM_X][TAM_Y], int x, int y)
+bool get_cell(bool world[TAM_X][TAM_Y], int x, int y)
 {
 	bool *min = &world[0][0];
 	bool *max = &world[TAM_X - 1][TAM_Y - 1];
