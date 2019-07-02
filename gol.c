@@ -1,32 +1,37 @@
 #include "gol.h"
 
-static int count_neighbors(bool world[TAM_X][TAM_Y], int x, int y);
-static bool get_cell(bool world[TAM_X][TAM_Y], int x, int y);
+static int count_neighbors(const struct worldClass *worlds, int x, int y);
+static bool get_cell(const struct worldClass *worlds, int x, int y);
 
-void gol_init(struct worldClass *wordlsObject)
+enum world_used
 {
-	wordlsObject->wordlUsed = false;
-	for (int i = 0; i < TAM_X; i++)
+	currentWorld = false,
+	nextWorld,
+};
+
+void gol_init(struct worldClass *worlds)
+{
+	for (int i = 0; i < worlds->tamX; i++)
 	{
-		for (int j = 0; j < TAM_Y; j++)
+		for (int j = 0; j < worlds->tamY; j++)
 		{
-			wordlsObject->worlds[wordlsObject->wordlUsed][i][j] = false;
+			worlds->worlds[currentWorld][i][j] = false;
 		}
 	}
-	wordlsObject->worlds[wordlsObject->wordlUsed][0][1] = true;
-	wordlsObject->worlds[wordlsObject->wordlUsed][1][2] = true;
-	wordlsObject->worlds[wordlsObject->wordlUsed][2][0] = true;
-	wordlsObject->worlds[wordlsObject->wordlUsed][2][1] = true;
-	wordlsObject->worlds[wordlsObject->wordlUsed][2][2] = true;
+	worlds->worlds[currentWorld][0][1] = true;
+	worlds->worlds[currentWorld][1][2] = true;
+	worlds->worlds[currentWorld][2][0] = true;
+	worlds->worlds[currentWorld][2][1] = true;
+	worlds->worlds[currentWorld][2][2] = true;
 }
 
-void gol_print(const struct worldClass *wordlsObject)
+void gol_print(const struct worldClass *worlds)
 {
-	for (int i = 0; i < TAM_X; i++)
+	for (int i = 0; i < worlds->tamX; i++)
 	{
-		for (int j = 0; j < TAM_Y; j++)
+		for (int j = 0; j < worlds->tamY; j++)
 		{
-			if (wordlsObject->worlds[wordlsObject->wordlUsed][i][j] == true)
+			if (worlds->worlds[currentWorld][i][j] == true)
 			{
 				printf(" X ");
 			}
@@ -39,53 +44,81 @@ void gol_print(const struct worldClass *wordlsObject)
 	}
 }
 
-void gol_step(struct worldClass *wordlsObject)
+void gol_step(struct worldClass *worlds)
 {
 
-	for (int i = 0; i < TAM_X; i++)
+	for (int i = 0; i < worlds->tamX; i++)
 	{
 
-		for (int j = 0; j < TAM_Y; j++)
+		for (int j = 0; j < worlds->tamY; j++)
 		{
-			int neighbors = count_neighbors(wordlsObject->worlds[wordlsObject->wordlUsed], i, j);
+			int neighbors = count_neighbors(worlds, i, j);
 
-			if (wordlsObject->worlds[wordlsObject->wordlUsed][i][j])
+			if (worlds->worlds[currentWorld][i][j])
 			{
-				wordlsObject->worlds[!wordlsObject->wordlUsed][i][j] = (neighbors == 3) || (neighbors == 2);
+				worlds->worlds[nextWorld][i][j] = (neighbors == 3) || (neighbors == 2);
 			}
 			else
 			{
-				wordlsObject->worlds[!wordlsObject->wordlUsed][i][j] = (neighbors == 3);
+				worlds->worlds[nextWorld][i][j] = (neighbors == 3);
 			}
 		}
 	}
-	wordlsObject->wordlUsed = !wordlsObject->wordlUsed;
+
+	bool **auxp = worlds->worlds[currentWorld];
+	worlds->worlds[currentWorld] = worlds->worlds[nextWorld];
+	worlds->worlds[nextWorld] = auxp;
 }
 
-int count_neighbors(bool world[TAM_X][TAM_Y], int x, int y)
+int count_neighbors(const struct worldClass *worlds, int x, int y)
 {
 	int neighbors = 0;
 
-	neighbors += get_cell(world, x - 1, y - 1);
-	neighbors += get_cell(world, x - 0, y - 1);
-	neighbors += get_cell(world, x + 1, y - 1);
+	neighbors += get_cell(worlds, x - 1, y - 1);
+	neighbors += get_cell(worlds, x - 0, y - 1);
+	neighbors += get_cell(worlds, x + 1, y - 1);
 
-	neighbors += get_cell(world, x - 1, y - 0);
-	neighbors += get_cell(world, x + 1, y - 0);
+	neighbors += get_cell(worlds, x - 1, y - 0);
+	neighbors += get_cell(worlds, x + 1, y - 0);
 
-	neighbors += get_cell(world, x - 1, y + 1);
-	neighbors += get_cell(world, x - 0, y + 1);
-	neighbors += get_cell(world, x + 1, y + 1);
+	neighbors += get_cell(worlds, x - 1, y + 1);
+	neighbors += get_cell(worlds, x - 0, y + 1);
+	neighbors += get_cell(worlds, x + 1, y + 1);
 
 	return neighbors;
 }
 
-bool get_cell(bool world[TAM_X][TAM_Y], int x, int y)
+bool get_cell(const struct worldClass *worlds, int x, int y)
 {
-	bool *min = &world[0][0];
-	bool *max = &world[TAM_X - 1][TAM_Y - 1];
+	bool *min = &worlds->worlds[currentWorld][0][0];
+	bool *max = &worlds->worlds[currentWorld][worlds->tamX - 1][worlds->tamY - 1];
 
-	if (&world[x][y] < min || &world[x][y] > max)
+	if (&worlds->worlds[currentWorld][x][y] < min || &worlds->worlds[currentWorld][x][y] > max)
 		return false;
-	return world[x][y];
+	return &worlds->worlds[currentWorld][x][y];
+}
+
+void gol_alloc(struct worldClass *worlds, int tamX, int tamY)
+{
+	worlds->worlds[currentWorld] = (bool **)malloc(tamX * sizeof(bool *));
+	worlds->worlds[nextWorld] = (bool **)malloc(tamX * sizeof(bool *));
+	for (int i = 0; i < tamX; i++)
+	{
+		worlds->worlds[currentWorld][i] = (bool *)malloc(tamY * sizeof(bool));
+		worlds->worlds[nextWorld][i] = (bool *)malloc(tamY * sizeof(bool));
+	}
+	worlds->tamX = tamX;
+	worlds->tamY = tamY;
+}
+
+void gol_free(struct worldClass *worlds)
+{
+	for (int i = 0; i < worlds->tamX; i++)
+	{
+		free(worlds->worlds[nextWorld][i]);
+		free(worlds->worlds[currentWorld][i]);
+	}
+
+	free(worlds->worlds[nextWorld]);
+	free(worlds->worlds[currentWorld]);
 }

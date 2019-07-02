@@ -1,6 +1,9 @@
 CC = gcc
 FLAGS = -Wall -Wextra
-all:main 
+
+.PHONY: all debug release clean
+
+all: main
 
 release: FLAGS +=-O3
 release: main

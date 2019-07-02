@@ -2,15 +2,20 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-#define TAM_X 15
-#define TAM_Y 15
+#ifndef _GOL_H_
+#define _GOL_H_
 
 struct worldClass
 {
-	bool worlds[2][TAM_X][TAM_Y];
-	bool wordlUsed;
+	bool **worlds[2];
+	int tamX;
+	int tamY;
 };
 
-void gol_init(struct worldClass *wordlsObject);
-void gol_print(const struct worldClass *wordlsObject);
-void gol_step(struct worldClass *wordlsObject);
+void gol_init(struct worldClass *worlds);
+void gol_print(const struct worldClass *worlds);
+void gol_step(struct worldClass *worlds);
+void gol_alloc(struct worldClass *worlds, int tamX, int tamY);
+void gol_free(struct worldClass *worlds);
+
+#endif
