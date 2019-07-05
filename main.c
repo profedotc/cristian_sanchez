@@ -9,8 +9,8 @@ int main()
 {
 	int i = 0;
 	struct worldClass worlds;
-	gol_init(&worlds);
 	gol_alloc(&worlds, TAM_X, TAM_Y);
+	gol_init(&worlds);
 	do
 	{
 		printf("\033cIteration %d\n", i++);
