@@ -9,7 +9,11 @@ int main()
 {
 	int i = 0;
 	struct worldClass worlds;
-	gol_alloc(&worlds, TAM_X, TAM_Y);
+	bool check = gol_alloc(&worlds, TAM_X, TAM_Y);
+	if(!check){
+		printf("***NO SE PUEDE ASIGNAR LA MEMORIA***\n");
+		exit(EXIT_FAILURE);
+	}
 	gol_init(&worlds);
 	do
 	{
