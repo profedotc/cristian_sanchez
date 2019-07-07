@@ -1,37 +1,39 @@
 #include "gol.h"
 
-static int count_neighbors(const struct worldClass *worlds, int x, int y);
-static bool get_cell(const struct worldClass *worlds, int x, int y);
-
 enum world_used
 {
 	CURRENTWORLD,
 	NEXTWORLD,
 };
 
-void gol_alloc(struct worldClass *worlds, int tamX, int tamY)
+static int count_neighbors(const struct worldClass *worlds, int x, int y);
+static bool get_cell(const struct worldClass *worlds, int x, int y);
+static void set_cell(struct worldClass *worlds, enum world_used ewu, int x, int y, bool baux);
+
+bool gol_alloc(struct worldClass *worlds, int tamX, int tamY)
 {
-	worlds->worlds[CURRENTWORLD] = (bool **)malloc(tamX * sizeof(bool *));
-	worlds->worlds[NEXTWORLD] = (bool **)malloc(tamX * sizeof(bool *));
-	for (int i = 0; i < tamX; i++)
+	for (int i = CURRENTWORLD; i <= NEXTWORLD; i++)
 	{
-		worlds->worlds[CURRENTWORLD][i] = (bool *)malloc(tamY * sizeof(bool));
-		worlds->worlds[NEXTWORLD][i] = (bool *)malloc(tamY * sizeof(bool));
+		worlds->worlds[i] = (bool *)malloc(tamX * tamY * sizeof(bool));
+		if (!worlds->worlds[i])
+			return 0;
 	}
 	worlds->tamX = tamX;
 	worlds->tamY = tamY;
+	return 1;
 }
 
 void gol_free(struct worldClass *worlds)
 {
-	for (int i = 0; i < worlds->tamX; i++)
+	for (int i = CURRENTWORLD; i <= NEXTWORLD; i++)
 	{
-		free(worlds->worlds[NEXTWORLD][i]);
-		free(worlds->worlds[CURRENTWORLD][i]);
+		free(worlds->worlds[i]);
 	}
+}
 
-	free(worlds->worlds[NEXTWORLD]);
-	free(worlds->worlds[CURRENTWORLD]);
+static void set_cell(struct worldClass *worlds, enum world_used ewu, int x, int y, bool baux)
+{
+	worlds->worlds[ewu][x * worlds->tamY + y] = baux;
 }
 
 void gol_init(struct worldClass *worlds)
@@ -40,14 +42,14 @@ void gol_init(struct worldClass *worlds)
 	{
 		for (int j = 0; j < worlds->tamY; j++)
 		{
-			worlds->worlds[CURRENTWORLD][i][j] = false;
+			set_cell(worlds, CURRENTWORLD, i, j, false);
 		}
 	}
-	worlds->worlds[CURRENTWORLD][0][1] = true;
-	worlds->worlds[CURRENTWORLD][1][2] = true;
-	worlds->worlds[CURRENTWORLD][2][0] = true;
-	worlds->worlds[CURRENTWORLD][2][1] = true;
-	worlds->worlds[CURRENTWORLD][2][2] = true;
+	set_cell(worlds, CURRENTWORLD, 0, 1, true);
+	set_cell(worlds, CURRENTWORLD, 1, 2, true);
+	set_cell(worlds, CURRENTWORLD, 2, 0, true);
+	set_cell(worlds, CURRENTWORLD, 2, 1, true);
+	set_cell(worlds, CURRENTWORLD, 2, 2, true);
 }
 
 void gol_print(const struct worldClass *worlds)
@@ -56,7 +58,7 @@ void gol_print(const struct worldClass *worlds)
 	{
 		for (int j = 0; j < worlds->tamY; j++)
 		{
-			if (worlds->worlds[CURRENTWORLD][i][j] == true)
+			if (get_cell(worlds, i, j) == true)
 			{
 				printf(" X ");
 			}
@@ -79,18 +81,20 @@ void gol_step(struct worldClass *worlds)
 		{
 			int neighbors = count_neighbors(worlds, i, j);
 
-			if (worlds->worlds[CURRENTWORLD][i][j])
+			if (get_cell(worlds, i, j))
 			{
-				worlds->worlds[NEXTWORLD][i][j] = (neighbors == 3) || (neighbors == 2);
+				bool baux = (neighbors == 2) || (neighbors == 3);
+				set_cell(worlds, NEXTWORLD, i, j, baux);
 			}
 			else
 			{
-				worlds->worlds[NEXTWORLD][i][j] = (neighbors == 3);
+				bool baux = neighbors == 3;
+				set_cell(worlds, NEXTWORLD, i, j, baux);
 			}
 		}
 	}
 
-	bool **auxp = worlds->worlds[CURRENTWORLD];
+	bool *auxp = worlds->worlds[CURRENTWORLD];
 	worlds->worlds[CURRENTWORLD] = worlds->worlds[NEXTWORLD];
 	worlds->worlds[NEXTWORLD] = auxp;
 }
@@ -131,5 +135,5 @@ bool get_cell(const struct worldClass *worlds, int x, int y)
 	{
 		y = worlds->tamY - 1;
 	}
-	return worlds->worlds[CURRENTWORLD][x][y];
+	return worlds->worlds[CURRENTWORLD][x * worlds->tamY + y];
 }

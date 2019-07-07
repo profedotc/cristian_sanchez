@@ -2,7 +2,7 @@
 CC = gcc $(CFLAGS)
 CFLAGS = -Wall -Wextra -std=c99
 
-.PHONY: all debug release test mem_test clean
+.PHONY: all debug release test clean
 
 all: debug
 

@@ -7,7 +7,7 @@
 
 struct worldClass
 {
-	bool **worlds[2];
+	bool *worlds[2];
 	int tamX;
 	int tamY;
 };
@@ -15,7 +15,7 @@ struct worldClass
 void gol_init(struct worldClass *worlds);
 void gol_print(const struct worldClass *worlds);
 void gol_step(struct worldClass *worlds);
-void gol_alloc(struct worldClass *worlds, int tamX, int tamY);
+bool gol_alloc(struct worldClass *worlds, int tamX, int tamY);
 void gol_free(struct worldClass *worlds);
 
 #endif
